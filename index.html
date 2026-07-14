@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -678,6 +679,9 @@
 </footer>
 
 <script>
+  <script>
+  emailjs.init("1ZkhXE8DOZWlEZQCW");
+
   // Nav scroll state
   const nav = document.getElementById('mainNav');
   window.addEventListener('scroll', () => {
@@ -712,26 +716,79 @@
     }
   });
 
-  // Order form (demo — replace with EmailJS/Supabase for production)
+  // ---- Formulaire commande au détail ----
   const form = document.getElementById('orderForm');
   const status = document.getElementById('form-status');
+
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    status.style.color = 'var(--or-fonce)';
-    status.textContent = 'Merci — votre demande a bien été enregistrée.';
-    form.reset();
+
+    const submitBtn = form.querySelector('.form-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi en cours...';
+
+    const quantiteValue = quantiteSelect.value === 'personnalise'
+      ? quantitePerso.value + ' flacon(s)'
+      : quantiteSelect.options[quantiteSelect.selectedIndex].text;
+
+    const params = {
+      title: 'Commande au détail — Maison Oud',
+      name: document.getElementById('nom').value,
+      email: document.getElementById('email').value,
+      telephone: document.getElementById('telephone').value || 'Non renseigné',
+      quantite: quantiteValue,
+      message: document.getElementById('message').value || 'Aucun message'
+    };
+
+    emailjs.send('service_34780ja', 'template_vp5vnwz', params)
+      .then(function() {
+        status.style.color = 'var(--or-fonce)';
+        status.textContent = 'Merci — votre demande a bien été enregistrée. Nous vous recontactons rapidement.';
+        form.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer la demande';
+      }, function(error) {
+        status.style.color = '#b03030';
+        status.textContent = "Une erreur est survenue, merci de réessayer ou de nous contacter directement.";
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer la demande';
+        console.error(error);
+      });
   });
 
-  // Reseller form (demo — replace with EmailJS/Supabase for production)
+  // ---- Formulaire revendeurs ----
   const revendeurForm = document.getElementById('revendeurForm');
   const revendeurStatus = document.getElementById('revendeur-status');
+
   revendeurForm.addEventListener('submit', function(e){
     e.preventDefault();
-    revendeurStatus.style.color = 'var(--or-fonce)';
-    revendeurStatus.textContent = 'Merci — votre demande professionnelle a bien été enregistrée.';
-    revendeurForm.reset();
+
+    const submitBtn = revendeurForm.querySelector('.form-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi en cours...';
+
+    const params = {
+      title: 'Demande revendeur — Maison Oud',
+      name: document.getElementById('revendeur-nom').value + ' ' + document.getElementById('revendeur-prenom').value,
+      email: 'Non renseigné (voir téléphone)',
+      telephone: document.getElementById('revendeur-telephone').value,
+      quantite: document.getElementById('revendeur-quantite').value + ' flacon(s)',
+      message: 'Demande de partenariat revendeur'
+    };
+
+    emailjs.send('service_34780ja', 'template_vp5vnwz', params)
+      .then(function() {
+        revendeurStatus.style.color = 'var(--or-fonce)';
+        revendeurStatus.textContent = 'Merci — votre demande professionnelle a bien été enregistrée.';
+        revendeurForm.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer la demande';
+      }, function(error) {
+        revendeurStatus.style.color = '#b03030';
+        revendeurStatus.textContent = "Une erreur est survenue, merci de réessayer ou de nous contacter directement.";
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer la demande';
+        console.error(error);
+      });
   });
 </script>
-
-</body>
-</html>
